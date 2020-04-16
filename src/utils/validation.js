@@ -1,134 +1,134 @@
 module.exports = {
     error: '',
     check: function (data, rule) {
-        for (var i = 0; i < rule.length; i++) {
+        for (let i = 0; i < rule.length; i++) {
             if (!rule[i].checkType) {
-                return true;
+                return true
             }
             if (!rule[i].name) {
-                return true;
+                return true
             }
             if (!rule[i].errorMsg) {
-                return true;
+                return true
             }
             if (!data[rule[i].name]) {
-                this.error = rule[i].errorMsg;
-                return false;
+                this.error = rule[i].errorMsg
+                return false
             }
             switch (rule[i].checkType) {
                 case 'string':
-                    var reg = new RegExp('^.{' + rule[i].checkRule + '}$');
-                    if (!reg.test(data[rule[i].name])) {
-                        this.error = rule[i].errorMsg;
-                        return false;
+                    let regString = new RegExp('^.{' + rule[i].checkRule + '}$')
+                    if (!regString.test(data[rule[i].name])) {
+                        this.error = rule[i].errorMsg
+                        return false
                     }
                     break
                 case 'int':
-                    var reg = new RegExp('^(-[1-9]|[1-9])[0-9]{' + rule[i].checkRule + '}$');
-                    if (!reg.test(data[rule[i].name])) {
-                        this.error = rule[i].errorMsg;
-                        return false;
+                    let regInt = new RegExp('^(-[1-9]|[1-9])[0-9]{' + rule[i].checkRule + '}$')
+                    if (!regInt.test(data[rule[i].name])) {
+                        this.error = rule[i].errorMsg
+                        return false
                     }
                     break
                 case 'between':
                     if (!this.isNumber(data[rule[i].name])) {
-                        this.error = rule[i].errorMsg;
-                        return false;
+                        this.error = rule[i].errorMsg
+                        return false
                     }
-                    var minMax = rule[i].checkRule.split(',');
-                    minMax[0] = Number(minMax[0]);
-                    minMax[1] = Number(minMax[1]);
-                    if (data[rule[i].name] > minMax[1] || data[rule[i].name] < minMax[0]) {
-                        this.error = rule[i].errorMsg;
+                    let minMaxBetween = rule[i].checkRule.split(',')
+                    minMaxBetween[0] = Number(minMaxBetween[0])
+                    minMaxBetween[1] = Number(minMaxBetween[1])
+                    if (data[rule[i].name] > minMaxBetween[1] || data[rule[i].name] < minMaxBetween[0]) {
+                        this.error = rule[i].errorMsg
                         return false
                     }
                     break
                 case 'betweenD':
-                    var reg = /^-?[1-9][0-9]?$/;
-                    if (!reg.test(data[rule[i].name])) {
-                        this.error = rule[i].errorMsg;
-                        return false;
+                    let regBetweenD = /^-?[1-9][0-9]?$/
+                    if (!regBetweenD.test(data[rule[i].name])) {
+                        this.error = rule[i].errorMsg
+                        return false
                     }
-                    var minMax = rule[i].checkRule.split(',');
-                    minMax[0] = Number(minMax[0]);
-                    minMax[1] = Number(minMax[1]);
-                    if (data[rule[i].name] > minMax[1] || data[rule[i].name] < minMax[0]) {
-                        this.error = rule[i].errorMsg;
-                        return false;
+                    let minMaxBetweenD = rule[i].checkRule.split(',')
+                    minMaxBetweenD[0] = Number(minMaxBetweenD[0])
+                    minMaxBetweenD[1] = Number(minMaxBetweenD[1])
+                    if (data[rule[i].name] > minMaxBetweenD[1] || data[rule[i].name] < minMaxBetweenD[0]) {
+                        this.error = rule[i].errorMsg
+                        return false
                     }
-                    break;
+                    break
                 case 'betweenF':
-                    var reg = /^-?[0-9][0-9]?.+[0-9]+$/;
-                    if (!reg.test(data[rule[i].name])) {
-                        this.error = rule[i].errorMsg;
-                        return false;
+                    let regBetweenF = /^-?[0-9][0-9]?.+[0-9]+$/
+                    if (!regBetweenF.test(data[rule[i].name])) {
+                        this.error = rule[i].errorMsg
+                        return false
                     }
-                    var minMax = rule[i].checkRule.split(',');
-                    minMax[0] = Number(minMax[0]);
-                    minMax[1] = Number(minMax[1]);
-                    if (data[rule[i].name] > minMax[1] || data[rule[i].name] < minMax[0]) {
-                        this.error = rule[i].errorMsg;
-                        return false;
+                    let minMaxBetweenF = rule[i].checkRule.split(',')
+                    minMaxBetweenF[0] = Number(minMaxBetweenF[0])
+                    minMaxBetweenF[1] = Number(minMaxBetweenF[1])
+                    if (data[rule[i].name] > minMaxBetweenF[1] || data[rule[i].name] < minMaxBetweenF[0]) {
+                        this.error = rule[i].errorMsg
+                        return false
                     }
-                    break;
+                    break
                 case 'same':
-                    if (data[rule[i].name] != rule[i].checkRule) {
-                        this.error = rule[i].errorMsg;
-                        return false;
+                    if (data[rule[i].name] !== rule[i].checkRule) {
+                        this.error = rule[i].errorMsg
+                        return false
                     }
-                    break;
+                    break
                 case 'notsame':
-                    if (data[rule[i].name] == rule[i].checkRule) {
-                        this.error = rule[i].errorMsg;
-                        return false;
+                    if (data[rule[i].name] === rule[i].checkRule) {
+                        this.error = rule[i].errorMsg
+                        return false
                     }
-                    break;
+                    break
                 case 'email':
-                    var reg = /^\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/;
-                    if (!reg.test(data[rule[i].name])) {
-                        this.error = rule[i].errorMsg;
-                        return false;
+                    const regEmail = /^\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/
+                    if (!regEmail.test(data[rule[i].name])) {
+                        this.error = rule[i].errorMsg
+                        return false
                     }
-                    break;
+                    break
                 case 'phoneno':
-                    var reg = /^1[0-9]{10,10}$/;
-                    if (!reg.test(data[rule[i].name])) {
-                        this.error = rule[i].errorMsg;
-                        return false;
+                    let regPhoneNo = /^1[0-9]{10,10}$/
+                    if (!regPhoneNo.test(data[rule[i].name])) {
+                        this.error = rule[i].errorMsg
+                        return false
                     }
-                    break;
+                    break
                 case 'zipcode':
-                    var reg = /^[0-9]{6}$/;
-                    if (!reg.test(data[rule[i].name])) {
-                        this.error = rule[i].errorMsg;
-                        return false;
+                    let regZipCode = /^[0-9]{6}$/
+                    if (!regZipCode.test(data[rule[i].name])) {
+                        this.error = rule[i].errorMsg
+                        return false
                     }
-                    break;
+                    break
                 case 'reg':
-                    var reg = new RegExp(rule[i].checkRule);
+                    let reg = new RegExp(rule[i].checkRule)
                     if (!reg.test(data[rule[i].name])) {
-                        this.error = rule[i].errorMsg;
-                        return false;
+                        this.error = rule[i].errorMsg
+                        return false
                     }
-                    break;
+                    break
                 case 'in':
-                    if (rule[i].checkRule.indexOf(data[rule[i].name]) == -1) {
-                        this.error = rule[i].errorMsg;
-                        return false;
+                    if (rule[i].checkRule.indexOf(data[rule[i].name]) === -1) {
+                        this.error = rule[i].errorMsg
+                        return false
                     }
-                    break;
+                    break
                 case 'notnull':
                     if (data[rule[i].name] == null || data[rule[i].name].length < 1) {
-                        this.error = rule[i].errorMsg;
-                        return false;
+                        this.error = rule[i].errorMsg
+                        return false
                     }
-                    break;
+                    break
             }
         }
-        return true;
+        return true
     },
     isNumber: function (checkVal) {
-        var reg = /^-?[1-9][0-9]?.?[0-9]*$/;
-        return checkVal === '0' || reg.test(checkVal);
+        let reg = /^-?[1-9][0-9]?.?[0-9]*$/
+        return checkVal === '0' || reg.test(checkVal)
     }
 }

@@ -50,14 +50,14 @@ export default {
     // 标题
     title: {
       type: String,
-      default: ""
+      default: ''
     }
   },
   name: 'FormItem',
   data() {
     return {
       errorMessage: null,
-      currentClass: ""
+      currentClass: ''
     }
   },
   mounted() {
@@ -65,8 +65,7 @@ export default {
     var findElement = (vnode, tag) => {
       if (vnode.tag.toUpperCase() === tag.toUpperCase()) {
         return vnode.elm
-      }
-      else {
+      } else {
         var element = null
         for (var index in vnode.children) {
           var elm = findElement(vnode.children[index], tag)
@@ -80,7 +79,7 @@ export default {
     }
 
     var message = {
-      ... {
+      ...{
         'required': `${self.title}不能为空`,
         'int': `${self.title}必须为整数`,
         'between': `${self.title}必须在{0}与{1}之间`,
@@ -90,7 +89,7 @@ export default {
         'phoneno': `${self.title}不是合法的手机号码格式`,
         'zipcode': `${self.title}不是合法的邮政编码格式`,
         'reg': `${self.title}不是合法的格式`,
-        'in': `${self.title}不是合法的数据`,
+        'in': `${self.title}不是合法的数据`
       },
       ...self.msg
     }
@@ -113,7 +112,6 @@ export default {
           }
 
           if (self.checkType === 'string') {
-
             //   最大长度
             var maxLength = self.maxLength || inputElm.maxLength
             if (maxLength !== -1) {
@@ -135,7 +133,7 @@ export default {
           // 数值区间
           if (['between', 'betweenD', 'betweenF'].indexOf(self.checkType) >= 0) {
             if (self.checkRule) {
-              var minMax = self.checkRule.split(',');
+              var minMax = self.checkRule.split(',')
               if (minMax.length === 2) {
                 if (validation.isNumber(minMax[0])) {
                   var min = validation.isNumber(minMax[0]) ? minMax[0] : inputElm.min
@@ -169,14 +167,13 @@ export default {
               var ruleData = null
               if (Array.isArray(self.checkRule)) {
                 ruleData = self.checkRule
-              }
-              else if (typeof self.checkRule === 'string') {
+              } else if (typeof self.checkRule === 'string') {
                 ruleData = self.checkRule.split(',')
               }
               rules.push({
                 name: 'input_value',
                 checkType: self.checkType,
-                checkRule: self.checkRule,
+                checkRule: ruleData,
                 errorMsg: message[self.checkType].replace('{0}', self.checkRule)
               })
             }
@@ -190,7 +187,7 @@ export default {
             self.currentClass = null
 
             for (let index = 0; index < rules.length; index++) {
-              const rule = rules[index];
+              const rule = rules[index]
               if (typeof rule === 'function') {
                 var result = rule(data)
                 if (result) {
@@ -198,8 +195,7 @@ export default {
                   self.currentClass = 'error'
                   break
                 }
-              }
-              else {
+              } else {
                 if (!validation.check(data, [rule])) {
                   self.errorMessage = validation.error
                   self.currentClass = 'error'
