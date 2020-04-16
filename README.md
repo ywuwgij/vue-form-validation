@@ -1,6 +1,6 @@
-# vue-demo
+# vue form  with validation
 
-> A Vue.js project
+> validation controls demo for form in vue
 
 ## Build Setup
 
