@@ -1,74 +1,44 @@
 <template>
   <div class="hello">
-    <h1>{{ msg }}</h1>
-    <h2>Essential Links</h2>
-    <form-item checkType="same" checkRule="100">
-      <input required max="100" min="10" />
-    </form-item>
-    <ul>
-      <li>
-        <a href="https://vuejs.org" target="_blank">Core Docs</a>
-      </li>
-      <li>
-        <a href="https://forum.vuejs.org" target="_blank">Forum</a>
-      </li>
-      <li>
-        <a href="https://chat.vuejs.org" target="_blank">Community Chat</a>
-      </li>
-      <li>
-        <a href="https://twitter.com/vuejs" target="_blank">Twitter</a>
-      </li>
-      <br />
-      <li>
-        <a href="http://vuejs-templates.github.io/webpack/" target="_blank">Docs for This Template</a>
-      </li>
-    </ul>
-    <h2>Ecosystem</h2>
-    <ul>
-      <li>
-        <a href="http://router.vuejs.org/" target="_blank">vue-router</a>
-      </li>
-      <li>
-        <a href="http://vuex.vuejs.org/" target="_blank">vuex</a>
-      </li>
-      <li>
-        <a href="http://vue-loader.vuejs.org/" target="_blank">vue-loader</a>
-      </li>
-      <li>
-        <a href="https://github.com/vuejs/awesome-vue" target="_blank">awesome-vue</a>
-      </li>
-    </ul>
+    <form-container @validation="validation">
+      <div v-for="item in formData" :key="item.name">
+        <form-item
+          :checkType="item.checkType"
+          :checkRule="item.checkRule"
+          :title="item.name"
+          :required="item.required"
+        >
+          <input v-model="item.value" />
+        </form-item>
+      </div>
+      <button type="submit">提交</button>
+    </form-container>
   </div>
 </template>
 
 <script>
 import FormItem from './FormItem'
+import FormContainer from './FormContainer'
 export default {
-  components: { FormItem },
-  name: 'HelloWorld',
+  components: { FormItem, FormContainer },
+  name: 'Home',
   data() {
     return {
-      msg: 'Welcome to Your Vue.js App'
+      formData: [
+        { name: 'nickname', value: 'jim', required: true, checkType: 'string', checkRule: '1,3', errorMsg: '姓名应为1-3个字符' },
+        { name: 'gender', value: '男', required: true, checkType: 'in', checkRule: '男,女', errorMsg: '请选择性别' },
+        { name: 'bd', value: '1972-1-3', required: false, checkType: 'notsame', checkRule: '请选择', errorMsg: '请选择生日' },
+        { name: 'aihao', value: '足球', required: false, checkType: 'notnull', checkRule: '', errorMsg: '请选择爱好' },
+        { name: 'email', value: '52665060@qq.com', required: true, checkType: 'email', checkRule: '', errorMsg: '请填写您的邮箱' }
+      ]
+    }
+  },
+  methods: {
+    validation(result) {
+      if (result) {
+        alert(`提交${JSON.stringify(this.formData)}`)
+      }
     }
   }
 }
 </script>
-
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-h1,
-h2 {
-  font-weight: normal;
-}
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-a {
-  color: #42b983;
-}
-</style>

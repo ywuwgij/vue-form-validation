@@ -1,5 +1,6 @@
 <template>
   <div style="display:-webkit-inline-box" v-bind:class="[currentClass]">
+    <label>{{title}}:</label>
     <slot></slot>
     <span style="padding-left:5px;" v-if="errorMessage">{{errorMessage}}</span>
   </div>
@@ -11,8 +12,7 @@ export default {
   props: {
     //   是否是必填项
     required: {
-      type: Boolean,
-      default: false
+      default: 'false'
     },
     // 验证类型
     checkType: {
@@ -57,19 +57,21 @@ export default {
   data() {
     return {
       errorMessage: null,
-      currentClass: ''
+      currentClass: '',
+      inputElm: null
     }
   },
   mounted() {
     var self = this
-    var findElement = (vnode, tag) => {
-      if (vnode.tag.toUpperCase() === tag.toUpperCase()) {
+    var findElement = (vnode, tags) => {
+      let _tags = tags.map(p => p.toUpperCase())
+      if (_tags.indexOf(vnode.tag.toUpperCase()) >= 0) {
         return vnode.elm
       } else {
         var element = null
         for (var index in vnode.children) {
-          var elm = findElement(vnode.children[index], tag)
-          if (elm !== null && elm.tagName.toUpperCase() === tag.toUpperCase()) {
+          var elm = findElement(vnode.children[index], tags)
+          if (elm !== null && _tags.indexOf(vnode.tag.toUpperCase()) >= 0) {
             element = elm
             break
           }
@@ -82,7 +84,9 @@ export default {
       ...{
         'required': `${self.title}不能为空`,
         'int': `${self.title}必须为整数`,
-        'between': `${self.title}必须在{0}与{1}之间`,
+        'between': `${self.title}必须是在{0}与{1}之间的数值格式`,
+        'betweenD': `${self.title}必须是在{0}与{1}之间的整数格式`,
+        'betweenF': `${self.title}必须在{0}与{1}之间的小数格式`,
         'same': `${self.title}输入不匹配`,
         'notsame': `${self.title}输入不匹配`,
         'email': `${self.title}不是合法的电子邮件格式`,
@@ -94,16 +98,30 @@ export default {
       ...self.msg
     }
 
+    // 获得范围表达式
+    var getRangeRule = (rule, defaultMin, defaultMax) => {
+      var minMax = self.checkRule ? self.checkRule.split(',') : [defaultMin, defaultMax]
+      var ruleValue = ''
+      if (minMax.length === 2) {
+        if (validation.isNumber(minMax[0])) {
+          var min = validation.isNumber(minMax[0]) ? minMax[0] : defaultMin
+          var max = validation.isNumber(minMax[1]) ? minMax[1] : defaultMax
+          ruleValue = `${min},${max}`
+        }
+      }
+      return ruleValue
+    }
+
     var defaultSlot = self.$slots['default']
     if (defaultSlot) {
       if (defaultSlot.length > 0) {
         var defaultNode = defaultSlot[0]
         if (defaultNode) {
-          var inputElm = findElement(defaultNode, 'input')
-
+          self.inputElm = findElement(defaultNode, ['input', 'select'])
           var rules = []
-          var required = self.required || inputElm.required
+          var required = self.required === true || self.required === 'true' || self.inputElm.required
           if (required) {
+            self.inputElm.removeAttribute('required')
             rules.push({
               name: 'input_value',
               checkType: 'notnull',
@@ -113,19 +131,24 @@ export default {
 
           if (self.checkType === 'string') {
             //   最大长度
-            var maxLength = self.maxLength || inputElm.maxLength
+            var maxLength = self.maxLength || self.inputElm.maxLength
             if (maxLength !== -1) {
-              inputElm.maxLength = maxLength
+              self.inputElm.maxLength = maxLength
             }
 
             // TODO 最小长度验证
           }
 
           // 整型、电子邮件地址、手机号码及邮政编码验证
-          if (['int', 'email', 'phoneno', 'zipcode'].indexOf(self.checkType)) {
+          if (['int', 'email', 'phoneno', 'zipcode'].indexOf(self.checkType) >= 0) {
+            let checkRule = ''
+            if (self.checkType === 'int') {
+              checkRule = getRangeRule(self.checkRule, '0', '999999999999')
+            }
             rules.push({
               name: 'input_value',
               checkType: self.checkType,
+              checkRule: checkRule,
               errorMsg: message[self.checkType]
             })
           }
@@ -133,19 +156,17 @@ export default {
           // 数值区间
           if (['between', 'betweenD', 'betweenF'].indexOf(self.checkType) >= 0) {
             if (self.checkRule) {
-              var minMax = self.checkRule.split(',')
-              if (minMax.length === 2) {
-                if (validation.isNumber(minMax[0])) {
-                  var min = validation.isNumber(minMax[0]) ? minMax[0] : inputElm.min
-                  var max = validation.isNumber(minMax[1]) ? minMax[1] : inputElm.max
-                  rules.push({
-                    name: 'input_value',
-                    checkType: self.checkType,
-                    checkRule: `${min},${max}`,
-                    errorMsg: message[self.checkType].replace('{0}', min).replace('{1}', max)
-                  })
-                }
-              }
+              let rangeValue = getRangeRule(self.checkRule,
+                validation.isNumber(self.inputElm.min) ? self.inputElm.min : '0',
+                validation.isNumber(self.inputElm.min) ? self.inputElm.max : '-1')
+              let min = rangeValue.split(',')[0]
+              let max = rangeValue.split(',')[1]
+              rules.push({
+                name: 'input_value',
+                checkType: self.checkType,
+                checkRule: rangeValue,
+                errorMsg: message[self.checkType].replace('{0}', min).replace('{1}', max)
+              })
             }
           }
 
@@ -179,33 +200,46 @@ export default {
             }
           }
 
-          inputElm.addEventListener('change', function () {
-            var data = {
-              'input_value': inputElm.value
-            }
-            self.errorMessage = null
-            self.currentClass = null
+          let eventName = 'change'
+          self.inputElm.__valid = function () {
+            if (self.inputElm.value || self.required === true || self.required === 'true' || self.inputElm.required) {
+              var data = {
+                'input_value': self.inputElm.value
+              }
+              self.errorMessage = null
+              self.currentClass = null
 
-            for (let index = 0; index < rules.length; index++) {
-              const rule = rules[index]
-              if (typeof rule === 'function') {
-                var result = rule(data)
-                if (result) {
-                  self.errorMessage = result
-                  self.currentClass = 'error'
-                  break
-                }
-              } else {
-                if (!validation.check(data, [rule])) {
-                  self.errorMessage = validation.error
-                  self.currentClass = 'error'
-                  break
+              for (let index = 0; index < rules.length; index++) {
+                const rule = rules[index]
+                if (typeof rule === 'function') {
+                  var result = rule(data)
+                  if (result) {
+                    self.errorMessage = result
+                    self.currentClass = 'error'
+                    break
+                  }
+                } else {
+                  if (!validation.check(data, [rule])) {
+                    self.errorMessage = validation.error
+                    self.currentClass = 'error'
+                    break
+                  }
                 }
               }
+            } else {
+              self.errorMessage = null
+              self.currentClass = ''
             }
-          })
+            return !self.currentClass
+          }
+          self.inputElm.addEventListener(eventName, self.inputElm.__valid)
         }
       }
+    }
+  },
+  methods: {
+    valid() {
+      return this.inputElm && this.inputElm.__valid ? this.inputElm.__valid() : true
     }
   }
 }
