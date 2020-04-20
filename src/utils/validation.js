@@ -128,7 +128,7 @@ module.exports = {
     return true
   },
   isNumber: function (checkVal) {
-    let reg = /^-?([0-9]{1,}[.][0-9]*)$/
+    let reg = /^(-?\d+)(\.\d+)?$/
     return checkVal === '0' || reg.test(checkVal)
   }
 }

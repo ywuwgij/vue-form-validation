@@ -82,6 +82,7 @@ export default {
 
     var message = {
       ...{
+        'string': `${self.title}应为{0}个字符`,
         'required': `${self.title}不能为空`,
         'int': `${self.title}必须为整数`,
         'between': `${self.title}必须是在{0}与{1}之间的数值格式`,
@@ -130,13 +131,17 @@ export default {
           }
 
           if (self.checkType === 'string') {
-            //   最大长度
-            var maxLength = self.maxLength || self.inputElm.maxLength
-            if (maxLength !== -1) {
-              self.inputElm.maxLength = maxLength
+            if (self.checkRule) {
+              let rangeValue = getRangeRule(self.checkRule,
+                validation.isNumber(self.inputElm.maxlength) ? self.inputElm.maxlength : '0',
+                validation.isNumber(self.inputElm.minlength) ? self.inputElm.minlength : '-1')
+              rules.push({
+                name: 'input_value',
+                checkType: 'string',
+                checkRule: rangeValue,
+                errorMsg: message['string'].replace('{0}', `${rangeValue.split(',')[0]}~${rangeValue.split(',')[1]}`)
+              })
             }
-
-            // TODO 最小长度验证
           }
 
           // 整型、电子邮件地址、手机号码及邮政编码验证
